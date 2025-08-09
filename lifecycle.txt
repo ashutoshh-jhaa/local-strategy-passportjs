@@ -1,0 +1,56 @@
+==========LIFECYCLE CHART==========
+
+=> FIRST LOGIN REQUEST (Session get created for first time)
+Client POST /login  (body: username=ashutosh&password=1234)
+   │
+   ▼
+[express-session]
+   • Parses cookies (none yet)
+   • Creates empty req.session = {}
+   │
+   ▼
+[passport.initialize()]
+   • Attaches passport helpers to req (req.login, req.logout, req.isAuthenticated)
+   │
+   ▼
+[passport.authenticate('local')]
+   • Runs LocalStrategy → calls verify callback
+   • If credentials valid → calls req.login(user)
+       ↳ serializeUser(user) → returns user.id
+       ↳ req.session.passport = { user: <id> }
+   │
+   ▼
+[express-session END]
+   • Saves req.session to store (key = session ID)
+   • Sends Set-Cookie: connect.sid=<sessionID> to client
+   │
+   ▼
+Response → Client stores cookie
+
+
+
+=> SUBSEQUENT REQUEST (User already logged in,session id sent with request)
+Client GET /dashboard
+Cookie: connect.sid=<sessionID>
+   │
+   ▼
+[express-session]
+   • Reads cookie value
+   • Looks up session in store → finds req.session = { passport: { user: <id> } }
+   │
+   ▼
+[passport.initialize()]
+   • Attaches passport helpers to req
+   │
+   ▼
+[passport.session()]
+   • Finds req.session.passport.user = <id>
+   • Calls deserializeUser(<id>) → returns user object
+   • Sets req.user = user
+   │
+   ▼
+[Route handler]
+   • Can now use req.user or req.isAuthenticated()
+   │
+   ▼
+Response sent back

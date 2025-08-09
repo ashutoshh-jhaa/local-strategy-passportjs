@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+    <head>
+        <title>time pass</title>
+    </head>
+    <body>
+        <script>
+            const login = async () => {
+                const res = await fetch("http://localhost:4000/login");
+                const result = await res.json();
+                console.log(result);
+            };
+            login();
+        </script>
+    </body>
+</html>
